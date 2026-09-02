@@ -8,25 +8,30 @@ import com.commerceflow.user.dto.AuthResponse;
 import com.commerceflow.user.dto.LoginRequest;
 import com.commerceflow.user.dto.RegisterRequest;
 import com.commerceflow.user.repository.UserRepository;
-
+import com.commerceflow.security.LoginRateLimiter;
+import com.commerceflow.exception.TooManyRequestsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AuthService {
 
+    private final LoginRateLimiter loginRateLimiter;
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
 
+
     public AuthService(
             UserRepository userRepository,
             JwtService jwtService,
-            PasswordEncoder passwordEncoder
-    ) {
+            PasswordEncoder passwordEncoder,
+            LoginRateLimiter loginRateLimiter) {
+
         this.userRepository = userRepository;
         this.jwtService = jwtService;
         this.passwordEncoder = passwordEncoder;
+        this.loginRateLimiter = loginRateLimiter;
     }
 
     // REGISTER USER
@@ -59,7 +64,15 @@ public class AuthService {
     }
 
     // LOGIN USER
-    public AuthResponse login(LoginRequest request) {
+    public AuthResponse login(LoginRequest request, String clientIp) {
+
+        String rateLimitKey = clientIp + ":" + request.getEmail().trim().toLowerCase();
+
+        if (!loginRateLimiter.isAllowed(rateLimitKey)) {
+            throw new TooManyRequestsException(
+                    "Too many login attempts. Please try again later."
+            );
+        }
 
         User user = userRepository
                 .findByEmail(request.getEmail())

@@ -12,7 +12,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import jakarta.persistence.OptimisticLockException;
-
+import com.commerceflow.exception.TooManyRequestsException;
 
 import jakarta.validation.ConstraintViolationException;
 import com.commerceflow.order.OrderStatus;
@@ -273,5 +273,18 @@ public class GlobalExceptionHandler {
                 error,
                 HttpStatus.BAD_REQUEST
         );
+    }
+    @ExceptionHandler(TooManyRequestsException.class)
+    public ResponseEntity<Map<String, Object>> handleTooManyRequests(
+            TooManyRequestsException ex) {
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("status", 429);
+        body.put("error", "Too Many Requests");
+        body.put("message", ex.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.TOO_MANY_REQUESTS)
+                .body(body);
     }
 }

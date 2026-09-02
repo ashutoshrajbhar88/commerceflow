@@ -5,6 +5,7 @@ import com.commerceflow.user.dto.LoginRequest;
 import com.commerceflow.user.dto.RegisterRequest;
 import com.commerceflow.user.service.AuthService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
@@ -39,11 +40,12 @@ public class AuthController {
     // LOGIN USER
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(
-            @Valid @RequestBody LoginRequest request
-    ) {
+            @Valid @RequestBody LoginRequest request,
+            HttpServletRequest httpRequest) {
 
-        AuthResponse response =
-                authService.login(request);
+        String clientIp = httpRequest.getRemoteAddr();
+
+        AuthResponse response = authService.login(request, clientIp);
 
         return ResponseEntity.ok(response);
     }
