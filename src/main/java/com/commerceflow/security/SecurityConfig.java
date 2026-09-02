@@ -50,6 +50,17 @@ public class SecurityConfig {
 
         http
                 .csrf(AbstractHttpConfigurer::disable)
+
+                .headers(headers -> headers
+                        .contentTypeOptions(contentTypeOptions -> {})
+                        .frameOptions(frameOptions -> frameOptions.deny())
+                        .referrerPolicy(referrerPolicy ->
+                                referrerPolicy.policy(
+                                        org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER
+                                )
+                        )
+                )
+
                 .cors(cors -> {})
 
                 .exceptionHandling(exception -> exception
