@@ -66,7 +66,8 @@ public class AuthService {
     // LOGIN USER
     public AuthResponse login(LoginRequest request, String clientIp) {
 
-        String rateLimitKey = clientIp + ":" + request.getEmail().trim().toLowerCase();
+        String rateLimitKey =
+                clientIp + ":" + request.getEmail().trim().toLowerCase();
 
         if (!loginRateLimiter.isAllowed(rateLimitKey)) {
             throw new TooManyRequestsException(
@@ -76,11 +77,13 @@ public class AuthService {
 
         User user = userRepository
                 .findByEmail(request.getEmail())
-                .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "Invalid email or password"
-                        )
-                );
+                .orElseThrow(() -> {
+                    loginRateLimiter.recordFailure(rateLimitKey);
+
+                    return new IllegalArgumentException(
+                            "Invalid email or password"
+                    );
+                });
 
         boolean passwordMatches =
                 passwordEncoder.matches(
@@ -89,10 +92,15 @@ public class AuthService {
                 );
 
         if (!passwordMatches) {
+            loginRateLimiter.recordFailure(rateLimitKey);
+
             throw new IllegalArgumentException(
                     "Invalid email or password"
             );
         }
+
+        // Successful login clears previous failed attempts
+        loginRateLimiter.reset(rateLimitKey);
 
         String token = jwtService.generateToken(user);
 
