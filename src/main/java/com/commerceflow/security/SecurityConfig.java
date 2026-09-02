@@ -7,15 +7,12 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.HttpStatusAccessDeniedHandler;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 @Configuration
 @EnableWebSecurity
@@ -184,10 +181,12 @@ public class SecurityConfig {
                                 ).hasRole("CUSTOMER")
 
                                 // PAYMENT APIs - AUTHENTICATED USERS
+
+                                // CREATE PAYMENT - CUSTOMER ONLY
                                 .requestMatchers(
                                         org.springframework.http.HttpMethod.POST,
                                         "/api/payments/**"
-                                ).authenticated()
+                                ).hasRole("CUSTOMER")
                                 // PUBLIC PRODUCT IMAGE FILES
                                 .requestMatchers(
                                         "/uploads/products/**"

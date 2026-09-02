@@ -2,6 +2,7 @@ package com.commerceflow.security;
 
 import com.commerceflow.user.User;
 import com.commerceflow.user.repository.UserRepository;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -40,46 +41,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String authHeader = request.getHeader("Authorization");
 
-        // TEMPORARY DEBUG
-        System.out.println("========== JWT REQUEST ==========");
-        System.out.println("REQUEST: "
-                + request.getMethod()
-                + " "
-                + request.getRequestURI());
-
-        System.out.println("AUTH HEADER PRESENT: "
-                + (authHeader != null));
-
-        if (authHeader != null) {
-            System.out.println("TOKEN LENGTH: "
-                    + authHeader.length());
-        }
-
-        System.out.println("=================================");
-
-
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-
             filterChain.doFilter(request, response);
             return;
         }
 
         try {
-
             String token = authHeader.substring(7);
 
-            System.out.println("========== JWT PROCESSING ==========");
-            System.out.println("TOKEN RECEIVED: true");
-
             String email = jwtService.extractEmail(token);
-
-            System.out.println("EMAIL FROM TOKEN: " + email);
 
             User user = userRepository
                     .findByEmail(email)
                     .orElse(null);
-
-            System.out.println("USER FOUND: " + (user != null));
 
             if (user != null
                     && jwtService.isTokenValid(token, user)
@@ -104,29 +78,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext()
                         .setAuthentication(authentication);
-
-                System.out.println("JWT AUTHENTICATION SUCCESS");
-                System.out.println("USER ROLE: "
-                        + user.getRole());
-                System.out.println("AUTHORITIES: "
-                        + authentication.getAuthorities());
             }
 
-            System.out.println("====================================");
-
         } catch (Exception e) {
-
-            System.out.println("========== JWT ERROR ==========");
-
-            System.out.println("EXCEPTION: "
-                    + e.getClass().getName());
-
-            System.out.println("MESSAGE: "
-                    + e.getMessage());
-
-            e.printStackTrace();
-
-            System.out.println("===============================");
+            // Invalid JWT: continue without authentication.
+            // Spring Security will return 401/403 as appropriate.
         }
 
         filterChain.doFilter(request, response);
