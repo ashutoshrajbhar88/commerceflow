@@ -3,7 +3,14 @@ package com.commerceflow.category.controller;
 import com.commerceflow.category.dto.CategoryRequest;
 import com.commerceflow.category.dto.CategoryResponse;
 import com.commerceflow.category.service.CategoryService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,9 +42,30 @@ public class CategoryController {
     }
 
     // GET CATEGORY BY ID
+    @Operation(summary = "Get category by ID")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Category found successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid category ID"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Authentication required"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Category not found"
+            )
+    })
     @GetMapping("/{id}")
     public CategoryResponse getCategoryById(
-            @PathVariable Long id
+            @PathVariable
+            @Min(value = 1, message = "Category ID must be at least 1")
+            Long id
     ) {
         return categoryService.getCategoryById(id);
     }

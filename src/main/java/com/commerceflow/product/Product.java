@@ -2,13 +2,17 @@ package com.commerceflow.product;
 
 import com.commerceflow.category.Category;
 import jakarta.persistence.*;
+import jakarta.persistence.Version;
+
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "products")
+@Table(name = "products", schema = "public")
 public class Product {
+
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -49,6 +53,8 @@ public class Product {
 
     public Product() {
     }
+
+
 
     public Long getId() {
         return id;
@@ -101,4 +107,18 @@ public class Product {
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
+
+    @Version
+    private Long version;
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
+
+
 }

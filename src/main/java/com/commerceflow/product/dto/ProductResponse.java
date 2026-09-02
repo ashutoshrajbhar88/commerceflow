@@ -2,6 +2,8 @@ package com.commerceflow.product.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import com.commerceflow.productimage.dto.ProductImageResponse;
+import java.util.List;
 
 public class ProductResponse {
 
@@ -16,6 +18,16 @@ public class ProductResponse {
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    private List<ProductImageResponse> images;
+
+    public List<ProductImageResponse> getImages() {
+        return images;
+    }
+
+    public void setImages(List<ProductImageResponse> images) {
+        this.images = images;
+    }
 
     public ProductResponse() {
     }
