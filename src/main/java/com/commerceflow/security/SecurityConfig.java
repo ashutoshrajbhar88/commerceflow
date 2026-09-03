@@ -19,7 +19,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
 import java.util.List;
 
 
@@ -215,6 +214,9 @@ public class SecurityConfig {
                                 .requestMatchers(
                                         "/uploads/products/**"
                                 ).permitAll()
+
+                                // PUBLIC HEALTH CHECK
+                                .requestMatchers("/api/v1/health").permitAll()
 
 // EVERYTHING ELSE REQUIRES LOGIN
                                 .requestMatchers("/error").permitAll()
