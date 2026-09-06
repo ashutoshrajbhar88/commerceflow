@@ -189,6 +189,7 @@ public class PaymentService {
         return mapToResponse(updatedPayment);
     }
 
+    @Transactional(readOnly = true)
     public PaymentResponse getPaymentByOrderId(Long orderId) {
 
         Payment payment = paymentRepository
@@ -253,6 +254,7 @@ public class PaymentService {
         return (User) authentication.getPrincipal();
     }
 
+    @Transactional(readOnly = true)
     public PaymentResponse getPaymentById(Long paymentId) {
 
         Payment payment = paymentRepository.findById(paymentId)
@@ -281,6 +283,7 @@ public class PaymentService {
         return mapToResponse(payment);
     }
 
+    @Transactional(readOnly = true)
     public List<PaymentResponse> getMyPayments() {
 
         User currentUser = getCurrentUser();
@@ -296,6 +299,7 @@ public class PaymentService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public PageResponse<PaymentResponse> getAllPayments(
             PaymentStatus status,
             PaymentMethod paymentMethod,

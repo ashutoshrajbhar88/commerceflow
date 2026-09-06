@@ -7,9 +7,6 @@ import jakarta.validation.constraints.Min;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.validation.annotation.Validated;
-import com.commerceflow.payment.dto.PaymentResponse;
-import com.commerceflow.payment.dto.PaymentResponse;
 import com.commerceflow.product.dto.PageResponse;
 
 import java.time.LocalDateTime;
@@ -110,6 +107,7 @@ public class PaymentController {
             LocalDateTime to,
 
             @RequestParam(defaultValue = "0")
+            @Min(0)
             int page,
 
             @RequestParam(defaultValue = "10")

@@ -2,11 +2,14 @@ package com.commerceflow.payment.dto;
 
 import com.commerceflow.payment.PaymentMethod;
 import com.commerceflow.payment.PaymentStatus;
+import com.commerceflow.payment.PaymentStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class PaymentResponse {
+
+    private PaymentStatus paymentStatus;
 
     private Long id;
 
@@ -19,6 +22,14 @@ public class PaymentResponse {
     private PaymentMethod paymentMethod;
 
     private LocalDateTime createdAt;
+
+    public PaymentStatus getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(PaymentStatus paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
 
     public Long getId() {
         return id;

@@ -37,7 +37,9 @@ public class AuthService {
     // REGISTER USER
     public AuthResponse register(RegisterRequest request) {
 
-        if (userRepository.existsByEmail(request.getEmail())) {
+        String email = request.getEmail().trim().toLowerCase();
+
+        if (userRepository.existsByEmail(email)) {
             throw new DuplicateResourceException(
                     "Email already registered"
             );
@@ -46,7 +48,7 @@ public class AuthService {
         User user = new User();
 
         user.setName(request.getName());
-        user.setEmail(request.getEmail());
+        user.setEmail(email);
 
         // Encrypt password before saving
         user.setPassword(
@@ -66,8 +68,9 @@ public class AuthService {
     // LOGIN USER
     public AuthResponse login(LoginRequest request, String clientIp) {
 
-        String rateLimitKey =
-                clientIp + ":" + request.getEmail().trim().toLowerCase();
+        String email = request.getEmail().trim().toLowerCase();
+
+        String rateLimitKey = clientIp + ":" + email;
 
         if (!loginRateLimiter.isAllowed(rateLimitKey)) {
             throw new TooManyRequestsException(
@@ -76,7 +79,7 @@ public class AuthService {
         }
 
         User user = userRepository
-                .findByEmail(request.getEmail())
+                .findByEmail(email)
                 .orElseThrow(() -> {
                     loginRateLimiter.recordFailure(rateLimitKey);
 

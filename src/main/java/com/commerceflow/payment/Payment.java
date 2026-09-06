@@ -14,7 +14,7 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false, unique = true)
     private Order order;
 
@@ -29,6 +29,7 @@ public class Payment {
     @Column(nullable = false)
     private PaymentMethod paymentMethod;
 
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     public Order getOrder() {

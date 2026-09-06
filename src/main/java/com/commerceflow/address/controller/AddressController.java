@@ -103,9 +103,6 @@ public class AddressController {
 
         Long userId = getCurrentUserId(authentication);
 
-        System.out.println("========== SET DEFAULT ==========");
-        System.out.println("CURRENT USER ID: " + userId);
-        System.out.println("ADDRESS ID: " + addressId);
 
         return ResponseEntity.ok(
                 addressService.setDefaultAddress(

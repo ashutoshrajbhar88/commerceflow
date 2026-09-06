@@ -9,6 +9,7 @@ import com.commerceflow.product.dto.PageResponse;
 import com.commerceflow.product.dto.ProductRequest;
 import com.commerceflow.product.dto.ProductResponse;
 import com.commerceflow.product.repository.ProductRepository;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 import com.commerceflow.product.dto.ProductStatsResponse;
 import com.commerceflow.order.repository.OrderItemRepository;
@@ -162,6 +163,7 @@ public class ProductService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public ProductResponse getProductById(Long id) {
 
         Product product = productRepository.findById(id)
@@ -268,6 +270,7 @@ public class ProductService {
 
 
 
+    @Transactional
     public ProductResponse updateProduct(Long id, ProductRequest request) {
 
 
@@ -312,6 +315,7 @@ public class ProductService {
         productRepository.delete(product);
     }
 
+    @Transactional(readOnly = true)
     public PageResponse<ProductResponse> filterProducts(
             String keyword,
             Long categoryId,

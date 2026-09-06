@@ -245,11 +245,7 @@ public class AddressService {
                                 )
                         );
 
-        System.out.println("ADDRESS OWNER ID: "
-                + address.getUser().getId());
 
-        System.out.println("CURRENT USER ID: "
-                + userId);
 
         if (!address.getUser()
                 .getId()

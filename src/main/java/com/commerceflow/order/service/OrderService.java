@@ -103,6 +103,13 @@ public class OrderService {
         Order order = new Order();
         order.setStatus(OrderStatus.PENDING);
         order.setUser(user);
+        OrderStatusHistory history = new OrderStatusHistory();
+
+        history.setOrder(order);
+        history.setOldStatus(null);
+        history.setNewStatus(OrderStatus.PENDING);
+
+        order.getStatusHistory().add(history);
 
         BigDecimal totalAmount = BigDecimal.ZERO;
 
@@ -187,6 +194,14 @@ public class OrderService {
         order.setUser(user);
         order.setStatus(OrderStatus.PENDING);
 
+        OrderStatusHistory history = new OrderStatusHistory();
+
+        history.setOrder(order);
+        history.setOldStatus(null);
+        history.setNewStatus(OrderStatus.PENDING);
+
+        order.getStatusHistory().add(history);
+
         BigDecimal totalAmount = BigDecimal.ZERO;
 
         // Convert CartItems into OrderItems
@@ -240,6 +255,8 @@ public class OrderService {
 
         return mapToResponse(savedOrder);
     }
+
+    @Transactional(readOnly = true)
     public OrderResponse getOrderById(Long id) {
 
         Order order = orderRepository.findOrderWithItemsById(id)
@@ -274,6 +291,7 @@ public class OrderService {
 //        return mapToResponse(order);
 //    }
 
+    @Transactional(readOnly = true)
     public PageResponse<OrderResponse> getAllOrders(
             OrderStatus status,
             LocalDateTime from,
@@ -402,6 +420,8 @@ public class OrderService {
                 orders.isLast()
         );
     }
+
+    @Transactional(readOnly = true)
     public OrderStatsResponse getOrderStats() {
 
         User currentUser = getCurrentUser();
@@ -487,6 +507,21 @@ public class OrderService {
                 );
             }
         }
+        // Prevent cancellation of orders with successful payment
+        if (newStatus == OrderStatus.CANCELLED) {
+
+            Payment payment = paymentRepository
+                    .findByOrder(order)
+                    .orElse(null);
+
+            if (payment != null
+                    && payment.getStatus() == PaymentStatus.SUCCESS) {
+
+                throw new IllegalStateException(
+                        "Order cannot be cancelled because payment is already successful"
+                );
+            }
+        }
 
         if (!currentStatus.canTransitionTo(newStatus)) {
             throw new IllegalStateException(
@@ -534,14 +569,11 @@ public class OrderService {
 
         User currentUser = getCurrentUser();
 
-        // Only CUSTOMER can cancel their own order
-        if (isAdmin(currentUser)) {
-            throw new UnauthorizedAccessException(
-                    "Admin cannot cancel orders through this endpoint"
-            );
-        }
+        // CUSTOMER can cancel only their own order.
+        // ADMIN can cancel any order.
+        if (!isAdmin(currentUser)
+                && !order.getUser().getId().equals(currentUser.getId())) {
 
-        if (!order.getUser().getId().equals(currentUser.getId())) {
             throw new UnauthorizedAccessException(
                     "You are not authorized to cancel this order"
             );
@@ -552,6 +584,7 @@ public class OrderService {
                     "Only pending orders can be cancelled"
             );
         }
+
         Payment payment = paymentRepository
                 .findByOrder(order)
                 .orElse(null);
@@ -566,6 +599,7 @@ public class OrderService {
 
         // Restore stock
         for (OrderItem item : order.getItems()) {
+
             Product product = item.getProduct();
 
             product.setStockQuantity(
@@ -575,6 +609,7 @@ public class OrderService {
 
         // Save status history
         OrderStatusHistory history = new OrderStatusHistory();
+
         history.setOrder(order);
         history.setOldStatus(OrderStatus.PENDING);
         history.setNewStatus(OrderStatus.CANCELLED);
@@ -682,6 +717,14 @@ public class OrderService {
         OrderResponse response = new OrderResponse();
 
         response.setId(order.getId());
+        response.setCustomerEmail(
+                order.getUser().getEmail()
+        );
+        response.setPaymentStatus(
+                paymentRepository.findByOrder(order)
+                        .map(Payment::getStatus)
+                        .orElse(null)
+        );
         response.setStatus(order.getStatus());
         response.setTotalAmount(order.getTotalAmount());
         response.setCreatedAt(order.getCreatedAt());
@@ -729,6 +772,7 @@ public class OrderService {
     }
 
 
+    @Transactional(readOnly = true)
     public OrderStatsResponse getOrderDashboard(
             LocalDateTime from,
             LocalDateTime to

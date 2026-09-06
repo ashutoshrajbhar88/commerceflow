@@ -193,10 +193,38 @@ public class SecurityConfig {
                         ).hasRole("ADMIN")
 
                         // CREATE ORDER - CUSTOMER ONLY
-                        .requestMatchers(
-                                org.springframework.http.HttpMethod.POST,
-                                "/api/orders"
-                        ).hasRole("CUSTOMER")
+                                // PAYMENT APIs
+                                .requestMatchers(
+                                        org.springframework.http.HttpMethod.POST,
+                                        "/api/orders"
+                                ).hasRole("CUSTOMER")
+
+// CREATE PAYMENT - CUSTOMER ONLY
+                                .requestMatchers(
+                                        org.springframework.http.HttpMethod.POST,
+                                        "/api/payments/**"
+                                ).hasRole("CUSTOMER")
+
+// PAYMENT MANAGEMENT - ADMIN ONLY
+                                .requestMatchers(
+                                        org.springframework.http.HttpMethod.PUT,
+                                        "/api/payments/*/success"
+                                ).hasRole("ADMIN")
+
+                                .requestMatchers(
+                                        org.springframework.http.HttpMethod.PUT,
+                                        "/api/payments/*/failed"
+                                ).hasRole("ADMIN")
+
+                                .requestMatchers(
+                                        org.springframework.http.HttpMethod.PUT,
+                                        "/api/payments/*/refund"
+                                ).hasRole("ADMIN")
+
+                                .requestMatchers(
+                                        org.springframework.http.HttpMethod.GET,
+                                        "/api/payments"
+                                ).hasRole("ADMIN")
 
                                 // CART APIs - CUSTOMER ONLY
                                 .requestMatchers(

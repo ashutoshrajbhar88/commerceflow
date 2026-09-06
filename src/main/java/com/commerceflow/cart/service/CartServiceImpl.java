@@ -139,6 +139,7 @@ public class CartServiceImpl implements CartService {
         return getCart();
     }
 
+    @Transactional(readOnly = true)
     @Override
     public CartResponse getCart() {
 
