@@ -172,7 +172,7 @@ function Payment() {
             >
               {processing
                 ? "Processing..."
-                : "Create Payment"}
+                : "Pay securely"}
             </button>
           </section>
 

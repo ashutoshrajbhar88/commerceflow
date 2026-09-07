@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { login } from "../services/authService";
-import { useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "./Login.css";
 
@@ -12,6 +12,7 @@ function Login() {
 
   const { login: saveToken } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -24,7 +25,7 @@ function Login() {
 
       saveToken(data.token);
 
-      navigate("/home");
+      navigate(location.state?.from || "/home");
     } catch (error) {
       console.error("Login failed:", error);
 
@@ -47,15 +48,16 @@ function Login() {
 
   return (
     <main className="login-page">
+      <section className="auth-visual">
+        <p className="login-eyebrow">COMMERCEFLOW</p>
+        <h2>Your bag, orders and wishlist in one place.</h2>
+        <p>Sign in to checkout faster and track every order.</p>
+      </section>
       <div className="login-card">
         <div className="login-header">
-          <p className="login-eyebrow">COMMERCEFLOW</p>
-
-          <h1>Welcome back</h1>
-
-          <p>
-            Sign in to continue to your CommerceFlow account.
-          </p>
+          <p className="login-eyebrow">WELCOME BACK</p>
+          <h1>Sign in</h1>
+          <p>Use your customer or admin account to continue.</p>
         </div>
 
         {error && (
@@ -101,9 +103,14 @@ function Login() {
             type="submit"
             className="login-button"
             disabled={loading}
+
           >
             {loading ? "Signing in..." : "Sign In"}
           </button>
+          <div className="login-register-link">
+            <span>Don't have an account?</span>
+            <Link to="/register">Create Account</Link>
+          </div>
         </form>
       </div>
     </main>

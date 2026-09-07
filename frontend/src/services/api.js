@@ -26,7 +26,16 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem("token");
 
-      if (window.location.pathname !== "/login") {
+      const path = window.location.pathname;
+      const stayOnPage =
+        path === "/login" ||
+        path === "/register" ||
+        path === "/home" ||
+        path === "/wishlist" ||
+        path === "/products" ||
+        path.startsWith("/products/");
+
+      if (!stayOnPage) {
         window.location.href = "/login";
       }
     }

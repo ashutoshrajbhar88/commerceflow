@@ -7,6 +7,8 @@ import {
   clearCart,
   checkout,
 } from "../services/cartService";
+import { useCart } from "../context/CartContext";
+import { formatPrice } from "../utils/format";
 import "./Cart.css";
 
 function Cart() {
@@ -18,13 +20,19 @@ function Cart() {
   const [updatingProductId, setUpdatingProductId] = useState(null);
 
   const navigate = useNavigate();
+  const { setCart: setSharedCart, refreshCart } = useCart();
+
+  const applyCart = (data) => {
+    setCart(data);
+    setSharedCart(data);
+  };
 
   const loadCart = async () => {
     try {
       setError("");
 
       const data = await getCart();
-      setCart(data);
+      applyCart(data);
     } catch (error) {
       console.error("Failed to load cart:", error);
 
@@ -55,8 +63,7 @@ function Cart() {
       setUpdatingProductId(productId);
 
       const updatedCart = await updateCartItem(productId, quantity);
-
-      setCart(updatedCart);
+      applyCart(updatedCart);
     } catch (error) {
       console.error("Failed to update cart item:", error);
 
@@ -82,8 +89,7 @@ function Cart() {
       setUpdatingProductId(productId);
 
       const updatedCart = await removeCartItem(productId);
-
-      setCart(updatedCart);
+      applyCart(updatedCart);
     } catch (error) {
       console.error("Failed to remove cart item:", error);
 
@@ -115,8 +121,7 @@ function Cart() {
 
     try {
       const updatedCart = await clearCart();
-
-      setCart(updatedCart);
+      applyCart(updatedCart);
     } catch (error) {
       console.error("Failed to clear cart:", error);
 
@@ -139,8 +144,7 @@ function Cart() {
 
     try {
       const order = await checkout();
-
-      console.log("Checkout successful:", order);
+      await refreshCart();
 
       navigate("/payment", {
         state: {
@@ -254,7 +258,7 @@ function Cart() {
                   <h2>{item.productName}</h2>
 
                   <p className="cart-item-price">
-                    ₹{item.price} each
+                    {formatPrice(item.price)} each
                   </p>
                 </div>
 
@@ -293,7 +297,7 @@ function Cart() {
                   </div>
 
                   <strong className="cart-item-subtotal">
-                    ₹{item.subtotal}
+                    {formatPrice(item.subtotal)}
                   </strong>
 
                   <button
@@ -324,7 +328,7 @@ function Cart() {
 
             <div className="summary-row summary-total">
               <span>Total</span>
-              <strong>₹{cart.totalAmount}</strong>
+              <strong>{formatPrice(cart.totalAmount)}</strong>
             </div>
 
             <button

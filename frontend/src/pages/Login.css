@@ -1,19 +1,39 @@
 .login-page {
-  min-height: calc(100vh - 73px);
+  min-height: calc(100vh - 120px);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  max-width: 980px;
+  margin: 48px auto;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  background: white;
+  box-shadow: var(--shadow-md);
+}
+
+.auth-visual {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 20px;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 36px;
+  color: white;
+  background:
+    linear-gradient(180deg, rgba(17, 24, 39, 0.2), rgba(17, 24, 39, 0.78)),
+    url("https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=80")
+      center / cover;
+}
+
+.auth-visual h2 {
+  color: white;
+  font-size: 34px;
+}
+
+.auth-visual p {
+  color: #e2e8f0;
 }
 
 .login-card {
-  width: 100%;
-  max-width: 440px;
-  padding: 38px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
+  padding: 42px 36px;
 }
 
 .login-header {
@@ -22,9 +42,9 @@
 
 .login-eyebrow {
   margin-bottom: 8px;
-  color: var(--primary);
-  font-size: 13px;
-  font-weight: 700;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 800;
   letter-spacing: 1.5px;
 }
 
@@ -33,59 +53,49 @@
   font-size: 36px;
 }
 
-.login-header p:last-child {
-  margin: 0;
-  font-size: 15px;
-}
-
 .login-error {
   margin-bottom: 20px;
   padding: 12px 14px;
-  border: 1px solid #fecaca;
-  border-radius: var(--radius-sm);
+  border-radius: 12px;
   background: #fef2f2;
   color: var(--danger);
-  font-size: 14px;
 }
 
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-}
-
-.login-form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  gap: 18px;
 }
 
 .login-form-group label {
-  color: var(--text);
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.login-form-group input {
-  padding: 12px;
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 700;
 }
 
 .login-button {
   width: 100%;
-  margin-top: 4px;
-  padding: 12px;
 }
 
-@media (max-width: 500px) {
+.login-register-link {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.login-register-link a {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+@media (max-width: 800px) {
   .login-page {
-    padding: 25px 16px;
+    grid-template-columns: 1fr;
+    margin: 24px 16px;
   }
 
-  .login-card {
-    padding: 25px 20px;
-  }
-
-  .login-header h1 {
-    font-size: 30px;
+  .auth-visual {
+    min-height: 180px;
   }
 }
