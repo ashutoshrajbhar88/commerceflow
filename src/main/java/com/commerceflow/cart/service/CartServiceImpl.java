@@ -100,9 +100,10 @@ public class CartServiceImpl implements CartService {
             int newQuantity =
                     cartItem.getQuantity()
                             + request.getQuantity();
+            int additionalQuantity = request.getQuantity();
 
             // Check available stock
-            if (newQuantity > product.getStockQuantity()) {
+            if (additionalQuantity > product.getStockQuantity()) {
                 throw new InsufficientStockException(
                         "Requested quantity exceeds available stock"
                 );
@@ -110,6 +111,9 @@ public class CartServiceImpl implements CartService {
 
             // Increase existing quantity
             cartItem.setQuantity(newQuantity);
+            product.setStockQuantity(
+                    product.getStockQuantity() - request.getQuantity()
+            );
 
         } else {
 
@@ -126,9 +130,13 @@ public class CartServiceImpl implements CartService {
             cartItem.setCart(cart);
             cartItem.setProduct(product);
             cartItem.setQuantity(request.getQuantity());
+                        product.setStockQuantity(
+                                        product.getStockQuantity() - request.getQuantity()
+                        );
         }
 
         cartItemRepository.save(cartItem);
+                productRepository.save(product);
 
         cart.setUpdatedAt(
                 java.time.LocalDateTime.now()
@@ -238,8 +246,10 @@ public class CartServiceImpl implements CartService {
                         )
                 );
 
-        // Check available stock
-        if (request.getQuantity() > product.getStockQuantity()) {
+                int quantityChange = request.getQuantity() - cartItem.getQuantity();
+
+                // Only additional units need to be reserved.
+                if (quantityChange > product.getStockQuantity()) {
             throw new InsufficientStockException(
                     "Requested quantity exceeds available stock"
             );
@@ -250,7 +260,12 @@ public class CartServiceImpl implements CartService {
                 request.getQuantity()
         );
 
+        product.setStockQuantity(
+                product.getStockQuantity() - quantityChange
+        );
+
         cartItemRepository.save(cartItem);
+        productRepository.save(product);
 
         // Update cart timestamp
         cart.setUpdatedAt(
@@ -298,6 +313,11 @@ public class CartServiceImpl implements CartService {
         // Delete cart item
         cartItemRepository.delete(cartItem);
 
+        product.setStockQuantity(
+                product.getStockQuantity() + cartItem.getQuantity()
+        );
+        productRepository.save(product);
+
         // Update cart timestamp
         cart.setUpdatedAt(
                 java.time.LocalDateTime.now()
@@ -327,6 +347,14 @@ public class CartServiceImpl implements CartService {
 
         // Delete all cart items
         cartItemRepository.deleteAll(cartItems);
+
+        cartItems.forEach(cartItem -> {
+            Product product = cartItem.getProduct();
+            product.setStockQuantity(
+                    product.getStockQuantity() + cartItem.getQuantity()
+            );
+            productRepository.save(product);
+        });
 
         // Update cart timestamp
         cart.setUpdatedAt(
@@ -381,6 +409,15 @@ public class CartServiceImpl implements CartService {
                 new OrderRequest();
 
         orderRequest.setItems(orderItems);
+
+        // Release the cart reservation before order creation consumes stock.
+        cartItems.forEach(cartItem -> {
+            Product product = cartItem.getProduct();
+            product.setStockQuantity(
+                    product.getStockQuantity() + cartItem.getQuantity()
+            );
+            productRepository.save(product);
+        });
 
         // Create order using existing OrderService
         OrderResponse orderResponse =

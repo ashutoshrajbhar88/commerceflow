@@ -1,4 +1,5 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
+import api from "../services/api";
 
 const AuthContext = createContext(null);
 
@@ -64,7 +65,41 @@ export function AuthProvider({ children }) {
     return getUserFromToken(savedToken);
   });
 
-  const login = (newToken) => {
+  const [loadingUser, setLoadingUser] = useState(true);
+
+  useEffect(() => {
+    const loadCurrentUser = async () => {
+      const savedToken = localStorage.getItem("token");
+
+      if (!isTokenValid(savedToken)) {
+        setLoadingUser(false);
+        return;
+      }
+
+      try {
+        const response = await api.get("/users/me");
+
+        setUser((currentUser) => ({
+          ...currentUser,
+          ...response.data,
+        }));
+      } catch (error) {
+        console.error("Failed to load current user:", error);
+
+        if (error.response?.status === 401) {
+          localStorage.removeItem("token");
+          setToken(null);
+          setUser(null);
+        }
+      } finally {
+        setLoadingUser(false);
+      }
+    };
+
+    loadCurrentUser();
+  }, [token]);
+
+  const login = async (newToken) => {
     if (!isTokenValid(newToken)) {
       console.error("Received invalid or expired JWT token.");
       return;
@@ -72,7 +107,20 @@ export function AuthProvider({ children }) {
 
     localStorage.setItem("token", newToken);
     setToken(newToken);
-    setUser(getUserFromToken(newToken));
+
+    const tokenUser = getUserFromToken(newToken);
+    setUser(tokenUser);
+
+    try {
+      const response = await api.get("/users/me");
+
+      setUser({
+        ...tokenUser,
+        ...response.data,
+      });
+    } catch (error) {
+      console.error("Failed to load user profile:", error);
+    }
   };
 
   const logout = () => {
@@ -90,6 +138,7 @@ export function AuthProvider({ children }) {
         token,
         user,
         isAuthenticated,
+        loadingUser,
         login,
         logout,
       }}
